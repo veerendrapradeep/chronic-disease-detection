@@ -1,0 +1,8 @@
+Training timestamp (UTC): 2026-04-17T06:34:05.116164+00:00
+Dataset path: C:\Users\Pawan\Downloads\chronic_disease_detcetion_project\chronic disease detection\data\raw\chronic_disease.csv
+Best model: logistic_regression
+Accuracy: 0.7600
+Precision: 0.4386
+Recall: 0.8621
+F1: 0.5814
+ROC-AUC: 0.8673

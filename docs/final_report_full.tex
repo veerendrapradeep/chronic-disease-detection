@@ -1,0 +1,1523 @@
+    \documentclass[12pt,a4paper,openany]{report}
+
+    \usepackage[utf8]{inputenc}
+    \usepackage[T1]{fontenc}
+    \usepackage{lmodern}
+    \usepackage[a4paper,top=0.72in,bottom=0.9in,left=0.88in,right=0.88in,footskip=34pt]{geometry}
+    \usepackage{setspace}
+    \usepackage{graphicx}
+    \usepackage{float}
+    \usepackage{booktabs}
+    \usepackage{longtable}
+    \usepackage{array}
+    \usepackage{tabularx}
+    \usepackage{amsmath}
+    \usepackage{amssymb}
+    \usepackage{hyperref}
+    \usepackage{xcolor}
+    \usepackage{listings}
+    \usepackage{caption}
+    \usepackage{enumitem}
+    \usepackage{multirow}
+    \usepackage{fancyhdr}
+    \usepackage{etoolbox}
+    \usepackage{currfile}
+
+    \graphicspath{{../reports/}{reports/}{./reports/}}
+    \DeclareGraphicsExtensions{.png,.jpg,.jpeg,.pdf}
+    \setkeys{Gin}{draft=false}
+
+    \setstretch{1.05}
+    \setlength{\parskip}{0.08em}
+    \setlength{\parindent}{1.05em}
+    \captionsetup{font=small}
+    \raggedbottom
+
+    \definecolor{deptred}{RGB}{122,33,33}
+    \definecolor{linegray}{RGB}{70,70,70}
+    \definecolor{codebg}{RGB}{248,248,248}
+
+    \hypersetup{
+        colorlinks=true,
+        linkcolor=blue,
+        urlcolor=blue,
+        citecolor=blue,
+        pdftitle={Chronic Disease Detection System Final Report},
+        pdfauthor={Student},
+        pdfsubject={Final Year Project Report}
+    }
+
+    \lstdefinestyle{base}{
+        basicstyle=\ttfamily\footnotesize,
+        backgroundcolor=\color{codebg},
+        frame=single,
+        breaklines=true,
+        tabsize=2,
+        numbers=left,
+        numberstyle=\tiny,
+        showstringspaces=false
+    }
+
+    \lstdefinestyle{pythonstyle}{
+        style=base,
+        language=Python,
+        keywordstyle=\color{blue},
+        commentstyle=\color{gray},
+        stringstyle=\color{teal}
+    }
+
+    \lstdefinestyle{shellstyle}{
+        style=base
+    }
+
+    \lstdefinestyle{jsonstyle}{
+        style=base
+    }
+
+    \newcommand{\projectgraphic}[2][]{%
+        \IfFileExists{#2}{%
+            \includegraphics[#1]{#2}%
+        }{%
+            \IfFileExists{../#2}{%
+                \includegraphics[#1]{../#2}%
+            }{%
+                \fbox{\parbox[c][4cm][c]{0.88\textwidth}{\centering Missing figure file: \texttt{\detokenize{#2}}}}%
+            }%
+        }%
+    }
+
+    \newcommand{\projectlisting}[2]{%
+        \IfFileExists{#2}{%
+            \lstinputlisting[style=#1,caption={\detokenize{#2}}]{#2}%
+        }{%
+            \IfFileExists{../#2}{%
+                \lstinputlisting[style=#1,caption={\detokenize{#2}}]{../#2}%
+            }{%
+                \IfFileExists{\currfiledir #2}{%
+                    \lstinputlisting[style=#1,caption={\detokenize{#2}}]{\currfiledir #2}%
+                }{%
+                    \IfFileExists{\currfiledir ../#2}{%
+                        \lstinputlisting[style=#1,caption={\detokenize{#2}}]{\currfiledir ../#2}%
+                    }{%
+                        \noindent\textbf{Missing source file:} \texttt{\detokenize{#2}}\par
+                        \noindent Upload this file to Overleaf if you want the full code listing here.\par
+                    }%
+                }%
+            }%
+        }%
+    }
+
+    \newcommand{\deptfooter}{
+        \begin{minipage}{\textwidth}
+        \centering
+        {\color{linegray}\rule{\textwidth}{0.4pt}}\par
+        \vspace{1pt}
+        \noindent\makebox[\textwidth][c]{%
+            \colorbox{white}{\parbox[c][0.42cm][c]{0.84\textwidth}{\centering\footnotesize ASIST CSE-CSM Department}}%
+            \colorbox{deptred}{\parbox[c][0.42cm][c]{0.10\textwidth}{\centering\color{white}\footnotesize\thepage}}%
+        }
+        \end{minipage}
+    }
+
+    \pagestyle{fancy}
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{0pt}
+    \fancyfoot[C]{\deptfooter}
+
+    \fancypagestyle{plain}{
+        \fancyhf{}
+        \renewcommand{\headrulewidth}{0pt}
+        \fancyfoot[C]{\deptfooter}
+    }
+
+    \begin{document}
+
+    \pagenumbering{roman}
+
+    \chapter*{Abstract}
+    \addcontentsline{toc}{chapter}{Abstract}
+    This report explains the full design and implementation of the \textbf{Chronic Disease Detection System}. The project is built as a complete academic machine learning workflow for early risk screening support using patient health indicators. The implementation includes data preparation, preprocessing, model training, model selection, explainability, command line prediction, a web interface, an API, and project deployment files.
+
+    The system is implemented using Python, Pandas, NumPy, Scikit-learn, Matplotlib, Streamlit, FastAPI, Uvicorn, and Joblib. Three machine learning models are trained and compared: Logistic Regression, Random Forest, and Extra Trees. The final selected model is Logistic Regression. In the saved run used for this documentation, the selected model achieved accuracy 0.7600, precision 0.4386, recall 0.8621, F1 score 0.5814, and ROC-AUC 0.8673 on the test split at threshold 0.4298.
+
+    This report is intentionally written in direct and simple English. It covers the problem, project goals, existing system, proposed system, dataset design, preprocessing, model development, mathematical basis, experiment setup, evaluation, explainability, application layer, testing, deployment, limitations, future work, and full source listings. The opening college cover pages are not included here because they can be attached later using the department template.
+
+    \chapter*{Document Note}
+    \addcontentsline{toc}{chapter}{Document Note}
+    This file contains the main technical body of the project report. The college specific front pages such as cover page, certificate page, declaration page, and approval page have been intentionally removed so they can be inserted later using the department template. The footer format is kept in the body pages for consistency.
+
+    \tableofcontents
+    \listoftables
+    \listoffigures
+    \lstlistoflistings
+    \clearpage
+
+    \pagenumbering{arabic}
+
+    \chapter{Introduction}
+    \section{Background}
+    Chronic diseases are one of the biggest long term health problems in the world. They often grow slowly and silently. Many patients may look normal in the early stage even when the internal risk is already increasing. Because of this, early identification is important.
+
+    In a normal healthcare flow, risk judgment depends on symptoms, test reports, follow up visits, and doctor experience. This is the correct clinical path, but screening can still take time when the number of patients is high. A machine learning based system can support the process by checking available patient indicators and giving a quick risk estimate. This estimate is not a medical diagnosis. It is an early screening support signal.
+
+    \section{Need for This Project}
+    This project was created because early flagging of high risk cases can support better follow up decisions. If a patient has multiple warning indicators such as poor glucose control, high blood pressure, poor diet, and low physical activity, the system should be able to combine those signals and produce a simple risk output. A clear system is also useful for academic learning because it shows the full path from raw data to deployed prediction.
+
+    \section{Main Goal}
+    The main goal is to build a complete and understandable machine learning project that predicts chronic disease risk from patient health indicators and presents the result in more than one usable format.
+
+    \section{Project Objectives}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item Build a complete machine learning pipeline from dataset loading to prediction.
+    \item Prepare mixed feature types properly for model training.
+    \item Compare more than one model and select the best model using screening focused metrics.
+    \item Export clear result files such as metrics tables, confusion matrix, ROC curve, and feature importance reports.
+    \item Provide prediction through command line, API, and web interface.
+    \item Prepare the project in a way that is easy to demonstrate, explain, and extend.
+    \end{enumerate}
+
+    \section{Scope}
+    The scope of the project is binary risk classification. The model predicts whether the patient belongs to a lower risk class or a higher risk class based on the current input values. The output is designed for screening support, not treatment planning, not medication advice, and not final diagnosis.
+
+    \section{Importance of Simple Implementation}
+    Many college projects look big in title but weak in implementation. This project takes the opposite route. The code is organized clearly, the outputs are visible, the figures are already generated, and the modules can be run one by one. This makes the project easier to explain in viva and easier to expand later.
+
+    \chapter{Problem Definition}
+    \section{Problem Statement}
+    The problem addressed by this project is delayed identification of high risk chronic disease cases in manual heavy workflows. A patient may have risk features spread across multiple fields such as age, BMI, glucose, HbA1c, cholesterol, kidney markers, activity level, and family history. When these values are checked separately, the combined risk may not be noticed quickly.
+
+    \section{Why Machine Learning Is Useful Here}
+    Machine learning is useful because it can combine multiple signals at once. Instead of reading each feature alone, the model learns patterns across many records and estimates how strongly a new case matches the risk pattern seen during training.
+
+    \section{Challenges in This Problem}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item patient data contains both numeric and categorical values,
+    \item missing values are common in practical settings,
+    \item risk is not decided by one feature alone,
+    \item screening needs high recall so fewer risky cases are missed,
+    \item the final system should be easy to explain and demonstrate.
+    \end{itemize}
+
+    \section{Expected Output}
+    The final system should accept patient values and return:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item predicted probability,
+    \item predicted class,
+    \item risk category,
+    \item threshold used for decision,
+    \item explainability reports for analysis.
+    \end{itemize}
+
+    \chapter{Existing System and Proposed System}
+    \section{Existing System}
+    The existing system in a general manual process depends on doctors, reports, repeated tests, and human review. It has the benefit of expert judgment, but it also has practical limits in speed and standardization when patient data volume increases.
+
+    \section{Weaknesses in Existing System}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item slower screening when many cases must be reviewed,
+    \item repeated manual reading of multiple values,
+    \item difficult to maintain a consistent scoring rule,
+    \item no automatic model comparison or threshold analysis,
+    \item no quick demo interface for educational use.
+    \end{itemize}
+
+    \section{Proposed System}
+    The proposed system uses a trained machine learning model to check patient indicators and produce a consistent risk output. The system includes preprocessing, model selection, saved artifacts, report generation, and application interfaces.
+
+    \section{Benefits of Proposed System}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item same preprocessing logic for training and prediction,
+    \item faster prediction after the model is trained,
+    \item multiple model comparison in one pipeline,
+    \item explainability outputs for interpretation,
+    \item ready made UI and API for demonstration.
+    \end{itemize}
+
+    \begin{table}[H]
+    \centering
+    \caption{Existing system and proposed system comparison}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4.7cm} X X}
+    \toprule
+    \textbf{Point} & \textbf{Existing System} & \textbf{Proposed System} \\
+    \midrule
+    Main workflow & Manual review and repeated checks & Automated ML based screening support \\
+    Speed & Slower in large record review & Fast after model training \\
+    Consistency & Depends on repeated human judgment & Same logic for every input \\
+    Reporting & Mostly manual & Automatic metrics and plots \\
+    Explainability & Not structured in software & Feature importance reports available \\
+    Demonstration value & Low for software project & High because full pipeline is visible \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \chapter{Literature and Conceptual Background}
+    \section{Chronic Disease Screening Idea}
+    Chronic disease screening systems usually work by checking a group of indicators rather than a single value. Blood sugar markers, blood pressure, kidney markers, body weight, sleep, diet, smoking, and family history can all contribute to risk. A screening model is useful when it can combine these signals and give an early warning.
+
+    \section{Why Binary Classification Fits This Project}
+    For academic implementation, binary classification is a practical choice. It is easier to explain, easier to evaluate, and easier to connect with threshold based alerting. The output can be presented as low risk or high risk, which is simple for demonstration.
+
+    \section{Why Logistic Regression Is Important}
+    Logistic Regression is one of the best baseline models for healthcare style tabular data because:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item it is simple and stable,
+    \item it works well with transformed tabular features,
+    \item it outputs probabilities,
+    \item it is easier to interpret than many complex models.
+    \end{itemize}
+
+    \section{Why Tree Based Models Were Also Used}
+    Random Forest and Extra Trees were included because tree based models can capture non linear patterns and feature interactions. Using multiple models gives a fairer comparison and makes the result section stronger.
+
+    \section{Role of Explainability}
+    Prediction alone is not enough for a strong report. A good health related ML project should also show which features are important. This is why the project generates permutation importance and coefficient based importance.
+
+    \chapter{Requirement Analysis}
+    \section{Functional Requirements}
+    \begin{table}[H]
+    \centering
+    \caption{Functional requirements}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{3.2cm} X}
+    \toprule
+    \textbf{ID} & \textbf{Module} & \textbf{Requirement} \\
+    \midrule
+    FR1 & Data & Generate or load patient data in a fixed schema \\
+    FR2 & Preprocessing & Handle missing values and transform mixed features \\
+    FR3 & Training & Train multiple machine learning models \\
+    FR4 & Selection & Compare models and select the best one \\
+    FR5 & Evaluation & Export accuracy, precision, recall, F1, and ROC-AUC \\
+    FR6 & Explainability & Generate feature importance tables and figures \\
+    FR7 & CLI & Predict risk from JSON input file \\
+    FR8 & UI & Provide web form based risk prediction \\
+    FR9 & API & Provide HTTP endpoints for prediction and health check \\
+    FR10 & Automation & Support one command execution of the main pipeline \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \section{Non Functional Requirements}
+    \begin{table}[H]
+    \centering
+    \caption{Non functional requirements}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{3.2cm} X}
+    \toprule
+    \textbf{ID} & \textbf{Category} & \textbf{Requirement} \\
+    \midrule
+    NFR1 & Reproducibility & Training should use fixed random state and script based execution \\
+    NFR2 & Maintainability & Code should be separated into modules by purpose \\
+    NFR3 & Readability & Logic should be easy to explain in viva and documentation \\
+    NFR4 & Usability & System should work through CLI, API, and UI \\
+    NFR5 & Portability & Project should include dependency file and Dockerfile \\
+    NFR6 & Transparency & Output should include explainability artifacts and metrics \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \section{Hardware Requirements}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item Standard laptop or desktop system
+    \item Minimum 4 GB RAM
+    \item Any modern CPU
+    \item Basic storage for dataset, reports, and model file
+    \end{itemize}
+
+    \section{Software Requirements}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item Python 3.x
+    \item Pandas
+    \item NumPy
+    \item Scikit-learn
+    \item Matplotlib
+    \item Streamlit
+    \item FastAPI
+    \item Uvicorn
+    \item Joblib
+    \end{itemize}
+
+    \chapter{Feasibility Study}
+    \section{Technical Feasibility}
+    The project is technically feasible because it uses standard Python libraries and well known machine learning methods. The dataset size is manageable. The required plots and metrics can be generated on a normal student system.
+
+    \section{Operational Feasibility}
+    The project is easy to operate because:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item the main commands are simple,
+    \item the input schema is fixed,
+    \item the UI form is direct,
+    \item the API accepts normal JSON data.
+    \end{itemize}
+
+    \section{Academic Feasibility}
+    The project is academically strong because it covers:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item data preprocessing,
+    \item model training,
+    \item evaluation,
+    \item explainability,
+    \item deployment support,
+    \item documentation and presentation.
+    \end{itemize}
+
+    \section{Economic Feasibility}
+    The development cost is low because the implementation uses open source tools and a small local environment. No paid cloud dependency is required for the academic version.
+
+    \chapter{Project Scope, Assumptions, and Boundaries}
+    \section{What Is Included}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item dataset generation and structured feature schema,
+    \item preprocessing and model pipeline,
+    \item model comparison,
+    \item threshold tuning,
+    \item report and figure generation,
+    \item CLI prediction,
+    \item API prediction,
+    \item Streamlit prediction UI,
+    \item Dockerfile for API deployment.
+    \end{itemize}
+
+    \section{What Is Not Included}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item direct diagnosis,
+    \item medication recommendation,
+    \item hospital database integration,
+    \item user login system,
+    \item large scale production monitoring.
+    \end{itemize}
+
+    \section{Design Assumptions}
+    The project assumes that patient input data follows the defined schema. It also assumes that the current academic dataset is enough to test the pipeline structure and output flow. The report focuses on the actual repository implementation and generated artifacts.
+
+    \chapter{System Architecture}
+    \section{Overall Architecture}
+    The project architecture is simple and modular. Data first enters the preprocessing pipeline. After preprocessing, candidate models are trained and compared. The selected model is saved as a single artifact. The same artifact is then used by the command line tool, the API, and the Streamlit interface.
+
+    \section{Architecture Flow}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item dataset is loaded or generated,
+    \item required columns are validated,
+    \item preprocessing converts raw values into model ready form,
+    \item candidate models are trained,
+    \item threshold is selected based on recall target,
+    \item best model is saved,
+    \item reports and figures are exported,
+    \item application layer uses the saved artifact for inference.
+    \end{enumerate}
+
+    \section{Main Directories}
+    \begin{table}[H]
+    \centering
+    \caption{Project directories}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.5cm} X}
+    \toprule
+    \textbf{Directory} & \textbf{Purpose} \\
+    \midrule
+    \texttt{src/} & core machine learning code \\
+    \texttt{app/} & interface and API code \\
+    \texttt{data/raw/} & dataset and sample patient input \\
+    \texttt{models/} & trained model artifacts \\
+    \texttt{reports/} & generated metrics and figures \\
+    \texttt{docs/} & documentation files \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \section{Why One Saved Artifact Is Useful}
+    The final model artifact stores the preprocessing pipeline and trained model together. This avoids mismatch between training logic and prediction logic. It also makes deployment easier because the application only needs to load one file.
+
+    \chapter{Dataset Design and Profiling}
+    \section{Dataset Overview}
+    The dataset file used by the project is \texttt{data/raw/chronic\_disease.csv}. The current saved dataset has 1500 rows with 16 input features and one target column. The target column is \texttt{has\_disease}.
+
+    \begin{table}[H]
+    \centering
+    \caption{Dataset overview}
+    \begin{tabular}{lr}
+    \toprule
+    \textbf{Metric} & \textbf{Value} \\
+    \midrule
+    Rows & 1500 \\
+    Input feature count & 16 \\
+    Target column & has\_disease \\
+    Positive count & 292 \\
+    Negative count & 1208 \\
+    Positive class rate & 0.1947 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \section{Feature List}
+    \begin{table}[H]
+    \centering
+    \caption{Feature definitions}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4.0cm} >{\raggedright\arraybackslash}p{2.1cm} X}
+    \toprule
+    \textbf{Feature} & \textbf{Type} & \textbf{Description} \\
+    \midrule
+    age & Numeric & age in years \\
+    bmi & Numeric & body mass index \\
+    systolic\_bp & Numeric & systolic blood pressure \\
+    diastolic\_bp & Numeric & diastolic blood pressure \\
+    glucose & Numeric & blood glucose value \\
+    hba1c & Numeric & average sugar control indicator \\
+    cholesterol & Numeric & cholesterol value \\
+    creatinine & Numeric & kidney related marker \\
+    egfr & Numeric & kidney filtration estimate \\
+    physical\_activity\_days & Numeric & number of active days in a week \\
+    sleep\_hours & Numeric & average sleep duration \\
+    gender & Categorical & female or male \\
+    smoking\_status & Categorical & never, former, current \\
+    family\_history & Categorical & no or yes \\
+    diet\_quality & Categorical & good, average, poor \\
+    alcohol\_intake & Categorical & low, moderate, high \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \section{Target Definition}
+    The target label is binary:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item 0 means lower risk class
+    \item 1 means higher risk class
+    \end{itemize}
+
+    \section{Class Distribution}
+    \begin{table}[H]
+    \centering
+    \caption{Class distribution}
+    \begin{tabular}{lrr}
+    \toprule
+    \textbf{Class} & \textbf{Count} & \textbf{Rate} \\
+    \midrule
+    Lower risk class 0 & 1208 & 0.8053 \\
+    Higher risk class 1 & 292 & 0.1947 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \section{How the Dataset Is Built}
+    The academic version of the project can generate a synthetic but realistic looking dataset. The generator creates age, BMI, blood pressure, glucose, HbA1c, cholesterol, kidney markers, activity level, sleep, smoking status, family history, diet quality, and alcohol intake. It then uses a weighted risk score to calculate the probability of disease class.
+
+    \section{Why Synthetic Generation Was Used}
+    Synthetic generation was useful in this project because:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item it allowed full pipeline testing without waiting for data access,
+    \item it kept the project reproducible,
+    \item it helped generate missingness and class behavior for preprocessing tests,
+    \item it made the final demonstration complete inside one repository.
+    \end{itemize}
+
+    \section{Missing Value Analysis}
+    The project intentionally injects light missingness so the preprocessing pipeline can be tested properly.
+
+    \begin{longtable}{lr}
+    \caption{Missing percentage by feature} \\
+    \toprule
+    \textbf{Feature} & \textbf{Missing Percentage} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Feature} & \textbf{Missing Percentage} \\
+    \midrule
+    \endhead
+    age & 3.000 \\
+    bmi & 2.133 \\
+    systolic\_bp & 4.267 \\
+    diastolic\_bp & 3.067 \\
+    glucose & 2.933 \\
+    hba1c & 3.667 \\
+    cholesterol & 2.200 \\
+    creatinine & 2.667 \\
+    egfr & 3.200 \\
+    physical\_activity\_days & 2.867 \\
+    sleep\_hours & 2.933 \\
+    gender & 1.733 \\
+    smoking\_status & 1.467 \\
+    family\_history & 2.133 \\
+    diet\_quality & 1.733 \\
+    alcohol\_intake & 2.067 \\
+    has\_disease & 0.000 \\
+    \bottomrule
+    \end{longtable}
+
+    \section{Numeric Feature Summary}
+    \begin{longtable}{lrrrrrrr}
+    \caption{Numeric feature summary from generated report} \\
+    \toprule
+    \textbf{Feature} & \textbf{Mean} & \textbf{Std} & \textbf{Min} & \textbf{P25} & \textbf{P50} & \textbf{P75} & \textbf{Max} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Feature} & \textbf{Mean} & \textbf{Std} & \textbf{Min} & \textbf{P25} & \textbf{P50} & \textbf{P75} & \textbf{Max} \\
+    \midrule
+    \endhead
+    age & 52.73 & 19.04 & 20.00 & 36.00 & 53.00 & 70.00 & 85.00 \\
+    bmi & 27.75 & 5.91 & 15.00 & 23.80 & 28.01 & 31.63 & 47.07 \\
+    systolic\_bp & 130.68 & 19.90 & 80.00 & 116.93 & 130.53 & 144.52 & 191.77 \\
+    diastolic\_bp & 81.48 & 11.90 & 50.00 & 73.41 & 81.39 & 88.96 & 123.45 \\
+    glucose & 127.88 & 38.71 & 60.00 & 100.12 & 125.93 & 154.49 & 254.65 \\
+    hba1c & 6.12 & 1.39 & 4.00 & 5.08 & 6.02 & 7.07 & 12.14 \\
+    cholesterol & 204.88 & 45.17 & 100.00 & 175.19 & 204.36 & 234.99 & 359.62 \\
+    creatinine & 1.00 & 0.38 & 0.40 & 0.73 & 0.98 & 1.26 & 2.28 \\
+    egfr & 83.96 & 23.96 & 10.64 & 67.85 & 83.78 & 99.18 & 140.00 \\
+    physical\_activity\_days & 3.42 & 2.34 & 0.00 & 1.00 & 3.00 & 5.00 & 7.00 \\
+    sleep\_hours & 6.83 & 1.30 & 3.00 & 5.96 & 6.79 & 7.72 & 10.00 \\
+    \bottomrule
+    \end{longtable}
+
+    \section{Dataset Quality Notes}
+    The dataset is clean in structure because required columns are validated before training. Missing values are present by design and are handled by the pipeline. The class distribution is imbalanced in a realistic way, which makes recall based evaluation more meaningful.
+
+    \chapter{Preprocessing Pipeline}
+    \section{Reason for Preprocessing}
+    Raw tabular data cannot always go directly into a machine learning model. Some fields are numeric, some are categorical, and some may be missing. A clean preprocessing pipeline solves this.
+
+    \section{Numeric Pipeline}
+    Numeric features use:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item median imputation to replace missing values,
+    \item standard scaling to normalize feature range.
+    \end{itemize}
+
+    \section{Categorical Pipeline}
+    Categorical features use:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item most frequent imputation for missing values,
+    \item one hot encoding to convert categories into machine readable columns.
+    \end{itemize}
+
+    \section{Why ColumnTransformer Was Used}
+    The project uses \texttt{ColumnTransformer} because it allows numeric and categorical pipelines to run side by side. This keeps the code clean and makes the preprocessing fully reusable.
+
+    \section{Validation of Required Columns}
+    Before training, the dataset is checked to confirm that all required columns are available. If any required column is missing, the training code raises an error. This is an important safety step.
+
+    \chapter{Mathematical Foundation}
+    \section{Binary Classification Output}
+    The model predicts the probability that a patient belongs to the higher risk class. The final decision is based on comparing this probability to a threshold.
+
+    \section{Logistic Function}
+    For Logistic Regression, the probability is given by:
+    \begin{equation}
+    p = \frac{1}{1 + e^{-z}}
+    \end{equation}
+    where $z$ is the weighted sum of transformed input features.
+
+    \section{Confusion Matrix}
+    The confusion matrix has four parts:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item true positive,
+    \item true negative,
+    \item false positive,
+    \item false negative.
+    \end{itemize}
+
+    \section{Accuracy}
+    \begin{equation}
+    \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+    \end{equation}
+
+    \section{Precision}
+    \begin{equation}
+    \text{Precision} = \frac{TP}{TP + FP}
+    \end{equation}
+
+    \section{Recall}
+    \begin{equation}
+    \text{Recall} = \frac{TP}{TP + FN}
+    \end{equation}
+
+    \section{F1 Score}
+    \begin{equation}
+    \text{F1} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+    \end{equation}
+
+    \section{ROC Curve and ROC-AUC}
+    The ROC curve shows the trade off between true positive rate and false positive rate. ROC-AUC gives a single score that summarizes how well the model separates the classes across many thresholds.
+
+    \section{Threshold Selection}
+    The project does not keep the default threshold at 0.5. Instead, it searches for a threshold that reaches the target recall and then selects the best precision among valid thresholds. This makes the decision rule more aligned with screening behavior.
+
+    \chapter{Model Development}
+    \section{Train Test Split}
+    The dataset is split into training and test parts with stratification so class balance is preserved. The test size used in the project is 20 percent.
+
+    \section{Candidate Models}
+    The project trains three models:
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item Logistic Regression
+    \item Random Forest
+    \item Extra Trees
+    \end{enumerate}
+
+    \section{Why More Than One Model Was Needed}
+    Using only one model would make the report weaker. Training multiple models allows the project to compare learning behavior, performance, and final suitability for the selected goal.
+
+    \section{Model Selection Strategy}
+    The model is selected using this order:
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item highest recall,
+    \item highest ROC-AUC,
+    \item highest F1 score,
+    \item highest precision.
+    \end{enumerate}
+
+    \section{Saved Model Artifact}
+    The best model artifact includes:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item preprocessing pipeline,
+    \item trained model,
+    \item selected threshold,
+    \item feature list,
+    \item target column name,
+    \item metrics,
+    \item training timestamp.
+    \end{itemize}
+
+    \chapter{Experiment Setup}
+    \section{Environment Setup}
+    The project uses a Python environment with dependencies defined in \texttt{requirements.txt}. The model is trained locally using saved scripts. Report images and CSV files are generated after training.
+
+    \section{Experiment Sequence}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item generate or load dataset,
+    \item split into train and test data,
+    \item train all candidate models,
+    \item predict probabilities on the test set,
+    \item select threshold using recall rule,
+    \item compute evaluation metrics,
+    \item choose best model,
+    \item save artifact and reports.
+    \end{enumerate}
+
+    \section{Why This Setup Is Good for a College Project}
+    This setup is strong for an academic project because it gives:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item clear training logic,
+    \item repeatable outputs,
+    \item proper metrics,
+    \item visible comparison across models,
+    \item enough material for explanation in viva.
+    \end{itemize}
+
+    \chapter{Results and Performance Analysis}
+    \section{Model Comparison Table}
+    \begin{table}[H]
+    \centering
+    \caption{Model comparison on test split}
+    \begin{tabular}{lcccccc}
+    \toprule
+    \textbf{Model} & \textbf{Threshold} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{ROC-AUC} \\
+    \midrule
+    logistic\_regression & 0.4298 & 0.7600 & 0.4386 & 0.8621 & 0.5814 & 0.8673 \\
+    extra\_trees & 0.3333 & 0.7433 & 0.4202 & 0.8621 & 0.5650 & 0.8671 \\
+    random\_forest & 0.2764 & 0.7067 & 0.3846 & 0.8621 & 0.5319 & 0.8544 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \section{Interpretation of Model Comparison}
+    The table shows that all three models reached similar recall after threshold tuning. This means the recall first objective was achieved across all models. After recall tie, Logistic Regression performed slightly better in ROC-AUC, F1 score, and precision, which is why it became the final choice.
+
+    \section{Selected Model Summary}
+    \begin{table}[H]
+    \centering
+    \caption{Final selected model summary}
+    \begin{tabular}{lr}
+    \toprule
+    \textbf{Metric} & \textbf{Value} \\
+    \midrule
+    Selected model & logistic\_regression \\
+    Threshold & 0.4298 \\
+    Accuracy & 0.7600 \\
+    Precision & 0.4386 \\
+    Recall & 0.8621 \\
+    F1 score & 0.5814 \\
+    ROC-AUC & 0.8673 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \section{Saved Model Evaluation}
+    \begin{table}[H]
+    \centering
+    \caption{Saved model evaluation on current dataset}
+    \begin{tabular}{lr}
+    \toprule
+    \textbf{Metric} & \textbf{Value} \\
+    \midrule
+    Accuracy & 0.7473 \\
+    Precision & 0.4264 \\
+    Recall & 0.8630 \\
+    F1 score & 0.5708 \\
+    ROC-AUC & 0.8651 \\
+    Threshold & 0.4298 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \section{Threshold Sensitivity}
+    \begin{longtable}{rrrrr}
+    \caption{Threshold sensitivity analysis} \\
+    \toprule
+    \textbf{Threshold} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Threshold} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+    \midrule
+    \endhead
+    0.20 & 0.5580 & 0.3008 & 0.9589 & 0.4579 \\
+    0.25 & 0.6087 & 0.3250 & 0.9384 & 0.4828 \\
+    0.30 & 0.6513 & 0.3494 & 0.9178 & 0.5061 \\
+    0.35 & 0.6933 & 0.3790 & 0.9007 & 0.5335 \\
+    0.40 & 0.7307 & 0.4108 & 0.8836 & 0.5609 \\
+    0.4298 & 0.7473 & 0.4264 & 0.8630 & 0.5708 \\
+    0.50 & 0.7773 & 0.4588 & 0.8014 & 0.5835 \\
+    0.60 & 0.8053 & 0.5000 & 0.6884 & 0.5793 \\
+    0.70 & 0.8300 & 0.5631 & 0.5651 & 0.5641 \\
+    \bottomrule
+    \end{longtable}
+
+    \section{Confusion Matrix Breakdown}
+    \begin{table}[H]
+    \centering
+    \caption{Confusion matrix from saved project profile}
+    \begin{tabular}{lrr}
+    \toprule
+    \textbf{Actual Class} & \textbf{Predicted Low Risk} & \textbf{Predicted High Risk} \\
+    \midrule
+    Lower risk class 0 & 869 & 339 \\
+    Higher risk class 1 & 40 & 252 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \section{Result Discussion}
+    The final model is strong in recall, which is exactly what the project needed for screening support. Precision is lower than recall because the threshold was intentionally chosen to catch more risky cases. For a college project, this is a good and explainable trade off.
+
+    \section{Performance Figures}
+    \begin{figure}[H]
+    \centering
+    \projectgraphic[width=0.74\textwidth]{reports/confusion_matrix.png}
+    \caption{Confusion matrix figure}
+    \end{figure}
+
+    \begin{figure}[H]
+    \centering
+    \projectgraphic[width=0.80\textwidth]{reports/roc_curves.png}
+    \caption{ROC curves of candidate models}
+    \end{figure}
+
+    \chapter{Explainability Analysis}
+    \section{Why Explainability Was Added}
+    In a health related project, prediction alone is not enough. It is useful to know which features pushed the result. This makes the output easier to discuss and helps the report look more complete and meaningful.
+
+    \section{Permutation Importance}
+    Permutation importance checks how much model quality drops when one feature is shuffled. If performance drops strongly, that feature is important.
+
+    \begin{table}[H]
+    \centering
+    \caption{Top permutation importance features}
+    \begin{tabular}{lcc}
+    \toprule
+    \textbf{Feature} & \textbf{Mean Importance} & \textbf{Std} \\
+    \midrule
+    hba1c & 0.07835 & 0.00473 \\
+    glucose & 0.06680 & 0.00758 \\
+    age & 0.05241 & 0.00452 \\
+    cholesterol & 0.03944 & 0.00521 \\
+    physical\_activity\_days & 0.03612 & 0.00397 \\
+    systolic\_bp & 0.02819 & 0.00362 \\
+    bmi & 0.02594 & 0.00441 \\
+    egfr & 0.01696 & 0.00278 \\
+    smoking\_status & 0.00872 & 0.00149 \\
+    family\_history & 0.00838 & 0.00241 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \begin{figure}[H]
+    \centering
+    \projectgraphic[width=0.82\textwidth]{reports/feature_importance_permutation.png}
+    \caption{Permutation importance plot}
+    \end{figure}
+
+    \section{Coefficient Based Importance}
+    Because Logistic Regression was selected, coefficient values can also be studied. Positive coefficients push the probability upward. Negative coefficients push the probability downward.
+
+    \begin{table}[H]
+    \centering
+    \caption{Top absolute logistic regression coefficients}
+    \begin{tabular}{lcc}
+    \toprule
+    \textbf{Feature} & \textbf{Coefficient} & \textbf{Absolute Value} \\
+    \midrule
+    numeric\_\_hba1c & 0.8483 & 0.8483 \\
+    numeric\_\_glucose & 0.7858 & 0.7858 \\
+    numeric\_\_cholesterol & 0.6882 & 0.6882 \\
+    numeric\_\_age & 0.6826 & 0.6826 \\
+    numeric\_\_physical\_activity\_days & -0.5510 & 0.5510 \\
+    numeric\_\_bmi & 0.5410 & 0.5410 \\
+    numeric\_\_systolic\_bp & 0.5192 & 0.5192 \\
+    categorical\_\_diet\_quality\_good & -0.4431 & 0.4431 \\
+    categorical\_\_family\_history\_no & -0.3957 & 0.3957 \\
+    numeric\_\_egfr & -0.3827 & 0.3827 \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \begin{figure}[H]
+    \centering
+    \projectgraphic[width=0.82\textwidth]{reports/feature_importance_coefficients.png}
+    \caption{Coefficient importance plot}
+    \end{figure}
+
+    \section{Simple Final Reading}
+    The explainability results show that sugar control markers, age, cholesterol, activity level, and blood pressure strongly influence the model. This is logical for the current project design and helps defend the model choice during viva.
+
+    \chapter{Application Layer}
+    \section{Command Line Prediction}
+    The command line prediction script allows testing from a JSON input file. This is useful for quick checks and pipeline verification.
+
+    \begin{lstlisting}[style=shellstyle,caption={Command line prediction}]
+    python -m src.predict --input data/raw/sample_patient.json
+    \end{lstlisting}
+
+    \begin{lstlisting}[style=jsonstyle,caption={Saved sample prediction output}]
+    {
+    "model_name": "logistic_regression",
+    "threshold": 0.42982936885224343,
+    "predicted_probability": 0.20123895345938644,
+    "predicted_label": 0,
+    "risk_category": "low_risk"
+    }
+    \end{lstlisting}
+
+    \section{FastAPI Service}
+    The FastAPI application turns the model into a local prediction service. It exposes:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item \texttt{/health} for health check
+    \item \texttt{/predict} for risk prediction
+    \end{itemize}
+
+    \begin{lstlisting}[style=shellstyle,caption={Health endpoint}]
+    curl http://localhost:8000/health
+    \end{lstlisting}
+
+    \begin{lstlisting}[style=shellstyle,caption={Prediction endpoint}]
+    curl -X POST http://localhost:8000/predict ^
+    -H "Content-Type: application/json" ^
+    -d @app/request_example.json
+    \end{lstlisting}
+
+    \section{Why API Support Matters}
+    API support makes the project stronger because it shows that the model can be used outside a notebook or script. It also shows clear separation between model logic and application access.
+
+    \section{Streamlit Interface}
+    The Streamlit interface allows a user to manually enter patient values using a form. This is useful for demo because the audience can see a direct input to output flow.
+
+    \section{Main UI Output}
+    The Streamlit app displays:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item predicted probability,
+    \item risk category,
+    \item threshold used,
+    \item alert message for low risk or high risk.
+    \end{itemize}
+
+    \section{API Validation Summary}
+    \begin{table}[H]
+    \centering
+    \caption{Selected API input constraints}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4cm} >{\raggedright\arraybackslash}p{2cm} X}
+    \toprule
+    \textbf{Field} & \textbf{Type} & \textbf{Range or rule} \\
+    \midrule
+    age & int & 0 to 120 \\
+    bmi & float & 10 to 60 \\
+    systolic\_bp & float & 70 to 250 \\
+    diastolic\_bp & float & 40 to 150 \\
+    glucose & float & 40 to 400 \\
+    hba1c & float & 3 to 18 \\
+    cholesterol & float & 80 to 450 \\
+    creatinine & float & 0.1 to 8 \\
+    egfr & float & 5 to 150 \\
+    physical\_activity\_days & int & 0 to 7 \\
+    sleep\_hours & float & 2 to 12 \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \chapter{Deployment Details}
+    \section{Local Execution Commands}
+    \begin{lstlisting}[style=shellstyle,caption={Project execution commands}]
+    pip install -r requirements.txt
+    python -m src.generate_sample_data --samples 1500
+    python -m src.train
+    python -m src.predict --input data/raw/sample_patient.json
+    python -m src.evaluate
+    python -m src.explain --repeats 10
+    streamlit run app/streamlit_app.py
+    uvicorn app.api:app --reload
+    \end{lstlisting}
+
+    \section{PowerShell Full Run}
+    The project also contains a PowerShell script that runs the main pipeline. This is useful for end to end execution in one flow.
+
+    \section{Docker Support}
+    \begin{lstlisting}[style=shellstyle,caption={Docker commands}]
+    docker build -t chronic-disease-api:latest .
+    docker run -p 8000:8000 chronic-disease-api:latest
+    \end{lstlisting}
+
+    \section{Deployment Value}
+    Deployment files make the project look complete because they show that the work is not limited to a single script. The model can be served and reused in a cleaner way.
+
+    \chapter{Testing and Validation}
+    \section{Testing Goal}
+    The main testing goal in this project is to verify that the pipeline runs from start to finish and produces correct output files and prediction results.
+
+    \section{Validation Steps Performed}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item dataset generation and sample patient export,
+    \item training and model comparison,
+    \item model artifact saving,
+    \item sample prediction generation,
+    \item saved model evaluation,
+    \item explainability report generation,
+    \item API endpoint implementation,
+    \item Streamlit app implementation.
+    \end{enumerate}
+
+    \section{Acceptance Checkpoints}
+    \begin{table}[H]
+    \centering
+    \caption{Acceptance checklist}
+    \begin{tabularx}{\textwidth}{X >{\raggedright\arraybackslash}p{2.2cm}}
+    \toprule
+    \textbf{Checkpoint} & \textbf{Status} \\
+    \midrule
+    Dataset generation available & Completed \\
+    Preprocessing pipeline available & Completed \\
+    Multiple models trained & Completed \\
+    Best model artifact saved & Completed \\
+    Metrics and plots exported & Completed \\
+    Explainability outputs available & Completed \\
+    Command line prediction works by design & Completed \\
+    FastAPI service implemented & Completed \\
+    Streamlit application implemented & Completed \\
+    Dockerfile included & Completed \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \section{Testing Discussion}
+    For a college project, this level of validation is enough to show a full working pipeline. The strongest evidence is the presence of generated files in the \texttt{reports/} and \texttt{models/} folders along with the matching code in \texttt{src/} and \texttt{app/}.
+
+    \chapter{User Manual}
+    \section{How to Run the Project}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item install dependencies from \texttt{requirements.txt},
+    \item generate the dataset if needed,
+    \item train the model,
+    \item launch the API or Streamlit app,
+    \item test with sample JSON input.
+    \end{enumerate}
+
+    \section{How to Use the Streamlit App}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item start the app,
+    \item enter patient data in the form,
+    \item press the predict button,
+    \item read the probability and risk category output.
+    \end{enumerate}
+
+    \section{How to Use the API}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item start the Uvicorn server,
+    \item send a POST request to \texttt{/predict},
+    \item pass the patient JSON body,
+    \item read the returned probability and class.
+    \end{enumerate}
+
+    \section{How to Explain It in Viva}
+    The easiest way to explain the project is:
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item start with the health screening problem,
+    \item explain the dataset features,
+    \item explain preprocessing,
+    \item explain why three models were trained,
+    \item explain why recall was prioritized,
+    \item show confusion matrix and ROC curve,
+    \item show the Streamlit app or API.
+    \end{enumerate}
+
+    \chapter{Advantages, Limitations, and Risk Notes}
+    \section{Advantages}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item complete end to end flow,
+    \item simple code structure,
+    \item multiple model comparison,
+    \item high recall screening behavior,
+    \item explainability outputs,
+    \item more than one prediction interface,
+    \item strong documentation value.
+    \end{itemize}
+
+    \section{Limitations}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item current version is an academic prototype,
+    \item the quality depends on the current dataset design,
+    \item production deployment would need stronger controls,
+    \item the output should not be treated as direct diagnosis.
+    \end{itemize}
+
+    \section{Risk Notes}
+    If this type of system is ever extended beyond academic use, it would need stronger testing, real approved data, access control, audit logs, and human supervision. Including this note improves the professional quality of the report.
+
+    \chapter{Future Enhancements}
+    \section{Possible Technical Improvements}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item use larger approved real datasets,
+    \item add cross validation and stricter evaluation design,
+    \item add calibration analysis,
+    \item add fairness checks across groups,
+    \item add authentication for the API,
+    \item add logging and monitoring,
+    \item add dashboard level analytics.
+    \end{enumerate}
+
+    \section{Possible Product Improvements}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item connect the API to a hospital style form workflow,
+    \item add patient history support,
+    \item add downloadable report summaries,
+    \item add a disease specific recommendation section with proper source review.
+    \end{enumerate}
+
+    \chapter{Conclusion}
+    This project delivers a full machine learning based chronic disease detection system in a clear and practical form. It covers dataset handling, preprocessing, model training, model comparison, threshold selection, explainability, command line prediction, API prediction, Streamlit interface, and deployment support.
+
+    The final selected model is Logistic Regression. It gives high recall and good ROC-AUC, which matches the screening objective of the project. The result files, source code, plots, and application layer together make the work complete for college level demonstration and documentation.
+
+    The strongest point of this project is that it is not just a theory report. The repository contains actual code, actual generated figures, actual evaluation files, and actual interfaces. That makes it a strong final year project base and a good foundation for future expansion.
+
+    \chapter{Detailed Module Walkthrough}
+    \section{Overview}
+    This chapter explains the codebase in a deeper and more structured way. The goal is to document what each module does, what inputs it expects, what outputs it produces, and how it connects to other parts of the system. This chapter is useful when the report is read without opening the source files.
+
+    \section{Configuration Module}
+    The configuration module stores all constants needed by the project. It defines folder paths, raw data path, model path, report paths, target name, random seed, test size, recall target, and the full list of numeric and categorical features. This design is useful because any path or setting change can be made in one location instead of editing many files.
+
+    The feature list is one of the most important parts of the whole system. The same set of features is reused in data generation, training, validation, prediction, and API input handling. This avoids schema mismatch. If the feature set was not centralized, one script could expect more columns than another script, and the final project would become unstable.
+
+    \section{Data Generation Module}
+    The data generation module creates a complete synthetic dataset. It uses random but bounded ranges for each numeric field. It also creates category values for gender, smoking status, family history, diet quality, and alcohol intake. These values are not random without structure. They are sampled in a controlled way so that the final dataset looks realistic enough for a college level prototype.
+
+    After generating feature values, the module computes a risk score. Some values increase the score, such as higher age, higher glucose, higher HbA1c, poorer diet, current smoking, and lower physical activity. Then a logistic function converts the score into probability. Finally, a binary target is sampled. This gives the project a dataset that is reproducible, interpretable, and connected to the final ML objective.
+
+    This module also exports a sample patient JSON file. That file is later used by the prediction script and the report. This small detail is important because it gives a direct example input for demonstrations and API testing.
+
+    \section{Data Pipeline Module}
+    The data pipeline module contains the preprocessing logic and utility functions. First, it creates project folders if they do not exist. Then it validates the presence of required columns. After that, it builds the numeric preprocessing pipeline and categorical preprocessing pipeline. Both are combined with \texttt{ColumnTransformer}.
+
+    The module also defines metric calculation. Accuracy, precision, recall, F1 score, and ROC-AUC are all computed from probability outputs and a threshold. This keeps the metric logic separate from the training loop and makes the code cleaner.
+
+    Another important function in this module is threshold selection. The project does not assume that probability 0.5 is always the correct decision point. Instead, the code searches across thresholds and selects one that satisfies the target recall requirement. This matches the screening nature of the project much better than a fixed threshold.
+
+    \section{Training Module}
+    The training module is the core of the system. It loads the dataset, prepares the train and test split, trains all candidate models, and compares their performance. It also saves the final model artifact and exports the generated reports. In a typical student project, this is the part that shows whether the work is complete or just conceptual.
+
+    The training loop uses a pipeline for each model so that preprocessing and learning remain linked. This is a strong design choice because it ensures that the model always receives transformed data in the same format during both training and prediction.
+
+    The training module also generates:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item model metrics CSV,
+    \item model metrics JSON,
+    \item confusion matrix figure,
+    \item ROC curve figure,
+    \item training summary text file.
+    \end{itemize}
+
+    This means the model training process also acts as a report generation step. That is one reason why the project is easy to explain and demonstrate.
+
+    \section{Prediction Module}
+    The prediction module loads the saved artifact, reads a JSON file, converts it into a dataframe, and applies the pipeline. It returns probability, predicted label, model name, threshold, and risk category. This file is simple, but it is one of the most practical parts of the project because it proves that the model can be used after training is complete.
+
+    The output design is also clear. Instead of returning only a binary number, the script returns both probability and risk category. This helps in user understanding. In a viva, this is easy to explain as a more informative design.
+
+    \section{Evaluation Module}
+    The evaluation module checks the saved model against the dataset and computes the final metrics. Even though the project is not a full production platform, this script gives an additional validation layer. It proves that the saved artifact can be loaded again and still produce stable metric output.
+
+    \section{Explainability Module}
+    The explainability module gives extra depth to the project. It calculates permutation feature importance and logistic regression coefficient importance. Permutation importance answers the question, ``Which features matter most for overall model quality?'' Coefficients answer the question, ``Which transformed inputs push the output more strongly up or down?''
+
+    This module also exports both CSV files and PNG plots. That means the project does not only generate raw numbers. It also produces human readable outputs that can be inserted directly into the report.
+
+    \section{API Module}
+    The API module turns the saved model into a prediction service using FastAPI. The health endpoint confirms that the API is running. The prediction endpoint accepts patient data, validates the values, performs prediction, and returns the result.
+
+    The API is useful for three reasons:
+    \begin{itemize}[leftmargin=1.4cm]
+    \item it shows separation between model logic and delivery logic,
+    \item it makes the project look more complete and modern,
+    \item it creates a path for future integration with dashboards or external systems.
+    \end{itemize}
+
+    \section{Streamlit Module}
+    The Streamlit module is the user facing interface. It accepts patient input through widgets and returns the model result with a threshold slider. This is very useful in a demonstration because it makes the project interactive. Instead of only showing code, the presenter can show a live risk prediction.
+
+    \section{Automation Script}
+    The PowerShell script supports one command execution. This is important for reproducibility. In college projects, reproducibility is often ignored, but here it is directly supported.
+
+    \chapter{Case Studies and Scenario Analysis}
+    \section{Purpose of Scenario Analysis}
+    Evaluation metrics are important, but readers also need to understand how the system behaves on individual examples. Scenario analysis is useful because it converts the model from abstract numbers into concrete examples.
+
+    \section{Scenario 1: Lower Risk Adult}
+    A lower risk adult might have balanced blood pressure, moderate BMI, good glucose control, good sleep, and no family history. In this case, the model should output a lower probability and a low risk label. This kind of case is useful because it shows that the model is not simply overpredicting disease.
+
+    \section{Scenario 2: High Glucose and High HbA1c}
+    When glucose and HbA1c values rise together, the model should respond strongly because both are major indicators in the current design. In the explainability results, these variables are among the top important features. So a case with poor sugar control naturally receives a higher predicted risk.
+
+    \section{Scenario 3: Poor Lifestyle Pattern}
+    A patient with low physical activity, poor diet quality, high alcohol intake, and current smoking status represents a different type of risky case. Even if not all lab values are extreme, the model should still reflect elevated risk because the generator included lifestyle burden in the risk score.
+
+    \section{Scenario 4: Kidney Function Concern}
+    If creatinine rises and eGFR drops, the model should interpret this as increased concern because these values are part of the kidney related signal in the feature set. This type of scenario helps demonstrate that the project is not limited to only sugar related indicators.
+
+    \section{Scenario 5: Family History and Age Effect}
+    Even with moderate current lab values, older age plus positive family history can raise the model probability. This is useful because it shows that the model combines long term risk context with current measurements.
+
+    \section{Scenario 6: Threshold Discussion}
+    One of the strongest points of the report is the threshold analysis. A patient with predicted probability near the threshold can be classified differently depending on the operating point. This helps explain why threshold policy matters in screening systems. A lower threshold increases sensitivity, while a higher threshold increases strictness.
+
+    \section{Educational Value of Scenarios}
+    These scenarios are useful for viva because they make it easy to explain why the model behaves in a certain way. They also help justify the inclusion of explainability plots and threshold sensitivity analysis.
+
+    \chapter{Security, Ethics, and Responsible Use}
+    \section{Need for Responsible Use Section}
+    Even in a college project, a health related machine learning system should include a basic ethical discussion. This improves the maturity of the report and shows that the limitations of ML in healthcare are understood.
+
+    \section{Data Responsibility}
+    Any real healthcare deployment would require patient consent, data governance approval, and strict handling of direct identifiers. In this project, a synthetic dataset is used, so privacy risk is lower. Still, the report clearly states that real deployment would require proper controls.
+
+    \section{Prediction Risk}
+    The output of this project is not a medical diagnosis. A machine learning score can support screening, but it cannot replace the doctor. A false negative may miss a risky case. A false positive may create extra concern. Because of this, the report positions the project as decision support only.
+
+    \section{Bias and Fairness}
+    The current academic version does not perform subgroup fairness testing. This is an important future area. Age, sex, and lifestyle linked features may behave differently across groups, so any serious deployment would need additional fairness review.
+
+    \section{Human in the Loop}
+    A safe workflow would keep the human expert in the loop. The model can help flag cases, but final action should still depend on proper medical review.
+
+    \section{Ethical Summary Table}
+    \begin{table}[H]
+    \centering
+    \caption{Ethical and practical concerns}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4.0cm} >{\raggedright\arraybackslash}p{2.4cm} X}
+    \toprule
+    \textbf{Concern} & \textbf{Risk Level} & \textbf{Comment} \\
+    \midrule
+    Wrong classification & High & Can affect follow up decisions if used carelessly \\
+    Bias across groups & Medium to High & Needs subgroup testing in future versions \\
+    Missing privacy controls & High & Real deployment would require stronger controls \\
+    Overtrust in model output & High & Must remain a support tool, not diagnosis \\
+    Lack of monitoring & Medium & Production style monitoring is future work \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \chapter{Troubleshooting, Maintenance, and Support Notes}
+    \section{Why This Chapter Matters}
+    Many final reports stop after showing results. This chapter adds practical maintenance value. It explains what can go wrong and how a developer or reviewer should respond.
+
+    \section{Common Training Problems}
+    \begin{itemize}[leftmargin=1.4cm]
+    \item missing required columns in the dataset,
+    \item missing Python packages,
+    \item model file not found during prediction,
+    \item path errors while generating reports,
+    \item LaTeX path problems when compiling the report outside the repo layout.
+    \end{itemize}
+
+    \section{Common Prediction Problems}
+    Prediction can fail when the input JSON is missing fields, when the field type is wrong, or when the saved model artifact does not exist. The API reduces some of these issues using Pydantic validation.
+
+    \section{Common Report Problems}
+    The report may fail to show images when the figure files are not uploaded to the LaTeX project. Code appendices may also fail if source files are not present. For this reason, the LaTeX file was updated to degrade more safely when external files are missing.
+
+    \section{Maintenance Checklist}
+    \begin{enumerate}[leftmargin=1.4cm]
+    \item keep dataset path consistent,
+    \item keep feature list unchanged across modules,
+    \item retrain if feature schema changes,
+    \item regenerate report figures after retraining,
+    \item verify API and Streamlit still load the new artifact,
+    \item update the report metrics and screenshots if outputs change.
+    \end{enumerate}
+
+    \chapter{Extended Viva Questions and Answers}
+    \section{Purpose}
+    This section gives ready made viva preparation material. It also adds value to the written report because it anticipates common examiner questions.
+
+    \begin{longtable}{p{6cm} p{8cm}}
+    \caption{Extended viva questions and answers} \\
+    \toprule
+    \textbf{Question} & \textbf{Answer} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Question} & \textbf{Answer} \\
+    \midrule
+    \endhead
+    Why did you choose chronic disease detection? & It is an important healthcare problem and it allows a good combination of data preprocessing, machine learning, explainability, and deployment in one final year project. \\
+    Why did you use machine learning? & Machine learning can combine many patient indicators together and generate a risk estimate more consistently than manual scoring alone. \\
+    Why did you use tabular data? & The selected features are naturally tabular and suitable for classical machine learning models. \\
+    Why did you choose Logistic Regression? & It is stable, interpretable, probability based, and performed best in the current comparison. \\
+    Why did you also train Random Forest and Extra Trees? & To compare different model families and make the evaluation stronger. \\
+    Why was recall prioritized? & In screening, missing a risky case can be more serious than raising extra alerts. \\
+    What is the role of threshold tuning? & Threshold tuning changes the decision boundary and helps match the model to the screening goal. \\
+    Why did you not keep threshold at 0.5? & Because the default threshold is not always the best operating point for recall based screening. \\
+    What preprocessing did you apply? & Median imputation and scaling for numeric features, most frequent imputation and one hot encoding for categorical features. \\
+    Why was ColumnTransformer useful? & It keeps numeric and categorical preprocessing together in one clean pipeline. \\
+    What is stored in the model artifact? & The preprocessing pipeline, trained model, threshold, feature list, target name, metrics, and timestamp. \\
+    Why did you add explainability? & It helps show which features are important and makes the output easier to interpret. \\
+    What is permutation importance? & It measures how much model quality drops when a feature is shuffled. \\
+    What do positive coefficients mean? & They increase the predicted probability in Logistic Regression. \\
+    What do negative coefficients mean? & They reduce the predicted probability in Logistic Regression. \\
+    Why did you build an API? & To show that the model can be served as a reusable prediction service. \\
+    Why did you build a Streamlit app? & To make the project interactive and easier to demonstrate. \\
+    Why did you include a Dockerfile? & It supports portability and shows deployment awareness. \\
+    What is the biggest limitation? & The dataset is synthetic and the project is an academic prototype. \\
+    Can this be used in hospitals directly? & No, not in the current form. It would need real validation, governance, monitoring, and approval. \\
+    What future work would you do first? & Use a stronger evaluation design with approved real data and additional monitoring. \\
+    What is ROC-AUC? & It is a threshold independent measure of class separation quality. \\
+    What is F1 score? & It balances precision and recall into a single value. \\
+    What are false positives and false negatives? & A false positive is a wrong alert, while a false negative is a missed risky case. \\
+    Which error is more serious here? & False negatives are more serious because they miss high risk cases. \\
+    \bottomrule
+    \end{longtable}
+
+    \appendix
+
+    \chapter{Project Tree}
+    \begin{lstlisting}[style=shellstyle,caption={Main project structure}]
+    app/
+    data/
+    docs/
+    models/
+    notebooks/
+    reports/
+    src/
+    .dockerignore
+    .gitignore
+    Dockerfile
+    README.md
+    requirements.txt
+    run_all.ps1
+    \end{lstlisting}
+
+    \chapter{Key Output Files}
+    \begin{table}[H]
+    \centering
+    \caption{Generated project files}
+    \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{5.3cm} X}
+    \toprule
+    \textbf{File} & \textbf{Purpose} \\
+    \midrule
+    \texttt{models/best\_model.joblib} & final saved model artifact \\
+    \texttt{reports/model\_metrics.csv} & candidate model comparison results \\
+    \texttt{reports/evaluation.json} & saved model evaluation summary \\
+    \texttt{reports/confusion\_matrix.png} & confusion matrix plot \\
+    \texttt{reports/roc\_curves.png} & ROC curve plot \\
+    \texttt{reports/feature\_importance\_permutation.csv} & permutation importance values \\
+    \texttt{reports/feature\_importance\_coefficients.csv} & coefficient importance values \\
+    \texttt{reports/sample\_prediction.json} & sample output from prediction module \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \chapter{Example Request and Response}
+    \begin{lstlisting}[style=jsonstyle,caption={\detokenize{app/request_example.json}}]
+    {
+    "age": 58,
+    "bmi": 32.4,
+    "systolic_bp": 152,
+    "diastolic_bp": 96,
+    "glucose": 184,
+    "hba1c": 7.8,
+    "cholesterol": 242,
+    "creatinine": 1.3,
+    "egfr": 62,
+    "physical_activity_days": 1,
+    "sleep_hours": 5.8,
+    "gender": "male",
+    "smoking_status": "current",
+    "family_history": "yes",
+    "diet_quality": "poor",
+    "alcohol_intake": "moderate"
+    }
+    \end{lstlisting}
+
+    \begin{lstlisting}[style=jsonstyle,caption={Sample prediction response}]
+    {
+    "model_name": "logistic_regression",
+    "threshold": 0.42982936885224343,
+    "predicted_probability": 0.20123895345938644,
+    "predicted_label": 0,
+    "risk_category": "low_risk"
+    }
+    \end{lstlisting}
+
+    \chapter{Source Code Listing: config.py}
+    \projectlisting{pythonstyle}{src/config.py}
+
+    \chapter{Source Code Listing: generate\_sample\_data.py}
+    \projectlisting{pythonstyle}{src/generate_sample_data.py}
+
+    \chapter{Source Code Listing: data\_pipeline.py}
+    \projectlisting{pythonstyle}{src/data_pipeline.py}
+
+    \chapter{Source Code Listing: train.py}
+    \projectlisting{pythonstyle}{src/train.py}
+
+    \chapter{Source Code Listing: predict.py}
+    \projectlisting{pythonstyle}{src/predict.py}
+
+    \chapter{Source Code Listing: evaluate.py}
+    \projectlisting{pythonstyle}{src/evaluate.py}
+
+    \chapter{Source Code Listing: explain.py}
+    \projectlisting{pythonstyle}{src/explain.py}
+
+    \chapter{Source Code Listing: api.py}
+    \projectlisting{pythonstyle}{app/api.py}
+
+    \chapter{Source Code Listing: streamlit\_app.py}
+    \projectlisting{pythonstyle}{app/streamlit_app.py}
+
+    \chapter{Source Code Listing: request\_example.json}
+    \projectlisting{jsonstyle}{app/request_example.json}
+
+    \chapter{Source Code Listing: requirements.txt}
+    \projectlisting{shellstyle}{requirements.txt}
+
+    \chapter{Source Code Listing: Dockerfile}
+    \projectlisting{shellstyle}{Dockerfile}
+
+    \chapter{Source Code Listing: run\_all.ps1}
+    \projectlisting{shellstyle}{run_all.ps1}
+
+    \chapter{References}
+    \begin{thebibliography}{99}
+
+    \bibitem{who}
+    World Health Organization,
+    Noncommunicable diseases,
+    \url{https://www.who.int/news-room/fact-sheets/detail/noncommunicable-diseases}
+
+    \bibitem{sklearn}
+    Scikit-learn Documentation,
+    \url{https://scikit-learn.org/}
+
+    \bibitem{pandas}
+    Pandas Documentation,
+    \url{https://pandas.pydata.org/docs/}
+
+    \bibitem{fastapi}
+    FastAPI Documentation,
+    \url{https://fastapi.tiangolo.com/}
+
+    \bibitem{streamlit}
+    Streamlit Documentation,
+    \url{https://docs.streamlit.io/}
+
+    \bibitem{matplotlib}
+    Matplotlib Documentation,
+    \url{https://matplotlib.org/}
+
+    \bibitem{numpy}
+    NumPy Documentation,
+    \url{https://numpy.org/doc/}
+
+    \bibitem{joblib}
+    Joblib Documentation,
+    \url{https://joblib.readthedocs.io/}
+
+    \bibitem{uvicorn}
+    Uvicorn Documentation,
+    \url{https://www.uvicorn.org/}
+
+    \bibitem{pydantic}
+    Pydantic Documentation,
+    \url{https://docs.pydantic.dev/}
+
+    \bibitem{roc}
+    Tom Fawcett,
+    An introduction to ROC analysis,
+    Pattern Recognition Letters, 2006.
+
+    \bibitem{pr}
+    Jesse Davis and Mark Goadrich,
+    The relationship between Precision-Recall and ROC curves,
+    Proceedings of ICML, 2006.
+
+    \bibitem{lrbook}
+    Christopher Bishop,
+    Pattern Recognition and Machine Learning,
+    Springer, 2006.
+
+    \bibitem{hastie}
+    Trevor Hastie, Robert Tibshirani, and Jerome Friedman,
+    The Elements of Statistical Learning,
+    Springer, 2009.
+
+    \bibitem{cdc}
+    Centers for Disease Control and Prevention,
+    About Chronic Diseases,
+    \url{https://www.cdc.gov/chronic-disease/about/index.html}
+
+    \bibitem{nhlbi}
+    National Heart, Lung, and Blood Institute,
+    Health Topics,
+    \url{https://www.nhlbi.nih.gov/health}
+
+    \bibitem{niddk}
+    National Institute of Diabetes and Digestive and Kidney Diseases,
+    Health Information,
+    \url{https://www.niddk.nih.gov/health-information}
+
+    \bibitem{whodiet}
+    World Health Organization,
+    Healthy Diet Fact Sheet,
+    \url{https://www.who.int/news-room/fact-sheets/detail/healthy-diet}
+
+    \bibitem{whophy}
+    World Health Organization,
+    Physical Activity Fact Sheet,
+    \url{https://www.who.int/news-room/fact-sheets/detail/physical-activity}
+
+    \bibitem{fastbook}
+    Aurélien Géron,
+    Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow,
+    O'Reilly Media, 2022.
+
+    \bibitem{mlops}
+    Mark Treveil and contributors,
+    Introducing MLOps,
+    O'Reilly Media, 2020.
+
+    \bibitem{nhanes}
+    Centers for Disease Control and Prevention,                                                 
+    NHANES Overview,
+    \url{https://www.cdc.gov/nchs/nhanes/about/index.html}
+
+    \bibitem{brfss}
+    Centers for Disease Control and Prevention,
+    BRFSS Overview,
+    \url{https://www.cdc.gov/brfss/about/index.htm}
+
+    \end{thebibliography}
+
+    \end{document}

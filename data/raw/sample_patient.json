@@ -1,0 +1,18 @@
+{
+  "age": 63.0,
+  "bmi": 15.0,
+  "systolic_bp": 131.7198696149525,
+  "diastolic_bp": 93.2213051322734,
+  "glucose": 179.15342187172428,
+  "hba1c": 5.222223885210001,
+  "cholesterol": 164.3320799824156,
+  "creatinine": 0.4,
+  "egfr": 52.81744503799224,
+  "physical_activity_days": 1.0,
+  "sleep_hours": 6.636385974489254,
+  "gender": "female",
+  "smoking_status": "never",
+  "family_history": "no",
+  "diet_quality": "good",
+  "alcohol_intake": "moderate"
+}

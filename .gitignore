@@ -1,0 +1,28 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter artifacts
+.ipynb_checkpoints/
+
+# Build and logs
+build/
+dist/
+*.log
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+
+# Generated artifacts
+models/*.joblib
+reports/*.json
+reports/*.csv
+reports/*.png

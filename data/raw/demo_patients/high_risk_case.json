@@ -1,0 +1,18 @@
+{
+  "age": 61,
+  "bmi": 34.2,
+  "systolic_bp": 158,
+  "diastolic_bp": 98,
+  "glucose": 198,
+  "hba1c": 8.1,
+  "cholesterol": 252,
+  "creatinine": 1.6,
+  "egfr": 58,
+  "physical_activity_days": 1,
+  "sleep_hours": 5.5,
+  "gender": "male",
+  "smoking_status": "current",
+  "family_history": "yes",
+  "diet_quality": "poor",
+  "alcohol_intake": "high"
+}

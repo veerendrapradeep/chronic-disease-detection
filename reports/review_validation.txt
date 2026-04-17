@@ -1,0 +1,29 @@
+﻿Review validation run started: 2026-04-17 12:43:09
+Python executable: C:\Users\Pawan\Downloads\chronic_disease_detcetion_project\chronic disease detection\.venv\Scripts\python.exe
+
+[1/4] Running syntax checks for app entrypoints...
+[2/4] Running smoke test...
+Smoke test passed: CLI prediction and API endpoints are working.
+[3/4] Running unittest contract suite...
+[command output]
+test_health_endpoint (test_api_contract.ApiContractTests.test_health_endpoint) ... ok
+test_predict_endpoint_contract (test_api_contract.ApiContractTests.test_predict_endpoint_contract) ... ok
+test_predict_requires_api_key_when_enabled (test_api_contract.ApiContractTests.test_predict_requires_api_key_when_enabled) ... ok
+test_root_endpoint (test_api_contract.ApiContractTests.test_root_endpoint) ... ok
+test_demo_case_probability_ordering (test_demo_patient_cases.DemoPatientCasesTests.test_demo_case_probability_ordering) ... ok
+test_demo_patient_files_exist (test_demo_patient_cases.DemoPatientCasesTests.test_demo_patient_files_exist) ... ok
+test_batch_predictions_contract (test_predict_batch_contract.PredictBatchContractTests.test_batch_predictions_contract) ... ok
+test_predict_output_contract (test_predict_contract.PredictContractTests.test_predict_output_contract) ... ok
+test_high_risk_summary_and_disclaimer_present (test_recommendations_contract.RecommendationsContractTests.test_high_risk_summary_and_disclaimer_present) ... ok
+test_recommendations_has_required_sections (test_recommendations_contract.RecommendationsContractTests.test_recommendations_has_required_sections) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.186s
+
+OK
+[4/4] Running demo batch predictions...
+Batch predictions completed for 4 files.
+Saved output: reports\demo_batch_predictions.json
+Generated: reports/demo_batch_predictions.json
+
+Review validation run finished.
